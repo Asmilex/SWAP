@@ -1,8 +1,32 @@
+---
+title: Práctica 1
+author: Andrés Millán Muñoz
+keywords: [SWAP, servidores, servers, cloud computing, vm]
+link-citations: true
+date: \today
+
+book: true
+classoption: [oneside]
+
+toc: true
+numbersections: true
+
+header-left: "\\textcolor{gray}{\\thetitle}"
+header-right: "\\author"
+footer-left: "\\hspace{1cm}"
+footer-center: "\\thepage"
+footer-right: "\\hspace{1cm}"
+
+colorlinks: true
+linkcolor: RoyalBlue
+urlcolor: RoyalBlue
+---
+
 # Práctica 1
 
 > Autor: Andrés Millán Muñoz
 
-En esta práctica instalaremos y configuraremos dos máquinas virtuales de Ubuntu Server mediante VMWare. En particular, pondremos a punto una instalación de Apache, PHP, MySQL, SSH, así como la interfaz de red necesaria para comunicar ambas máquinas.
+En esta práctica instalaremos y configuraremos dos máquinas virtuales de Ubuntu Server mediante VMWare. En particular, pondremos a punto una instalación de Apache, PHP, MySQL, SSH; así como la interfaz de red necesaria para comunicar ambas máquinas con el host y entre ellas mismas.
 
 Para ver que todo funciona correctamente, usaremos la herramienta `curl` para solicitar una pequeña página web que crearemos. De esa forma, comprobaremos que Apache está listo. Esta página web estará alojada en las máquinas respectivas.
 
@@ -42,7 +66,9 @@ Podemos comprobar que se está ejecutando con `ps aux | grep apache`:
 
 ### cURL
 
-cURL está instalado por defecto, así que no será necesario ponerlo a mano.
+**cURL está instalado por defecto**, así que no será necesario ponerlo a mano.
+
+![](img/1/curl_v.png)
 
 ## Configurando la interfaz de red
 
@@ -80,3 +106,23 @@ Y en m2:
 Si desde el host hacemos `curl http://192.168.49.128/swap.html`, obtenemos
 
 ![](./img/1/curl.png)
+
+## SSH
+
+Vamos a conectar las dos máquinas mediante SSH. Para acceder desde M1 a M2, ponemos
+
+```
+ssh 192.168.121.131
+```
+
+Y obtenemos
+
+![](img/1/ssh_1.png)
+
+Si queremos loggearnos en las máquinas sin necesidad de poner la contraseña, tenemos que hacer lo siguiente:
+
+1. Generar un nuevo par de claves SSH con `ssh-keygen`.
+2. Modificar el archivo `/etc/ssh/sshd_config` poniendo `PermitRootLogin yes`.
+3. Copiar la clave a la otra máquina con `ssh-copy-id`. En mi caso, para mandarla de M1 a M2, ponemos `ssh-copy-id amilmun@192.168.121.131`.
+
+![](img/1/ssh_2.png)
