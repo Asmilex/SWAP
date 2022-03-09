@@ -12,7 +12,14 @@ Antes de comenzar, debemos instalar ambos sistemas en VMWare. Se intentó hacerl
 
 Empecemos con la creación de las máquinas. Como el proceso es análogo, mostraremos únicamente fotos de la segunda máquina, la correspondiente a `m2-amilmun`.
 
-El usuario será `amilmun`, y la contraseña será `Swap1234`, como se indica en el guion. No hay que cambiar demasiados parámetros del instalador. Se usarán los que vienen por defecto.
+El usuario será `amilmun`, y la contraseña será `Swap1234`, como se indica en el guion. Aparte de la distribución de teclado, puesto que utilizo ANSI, no se cambia ningún parámetro por defecto.
+
+![](img/1/vmw_1.png)
+![](img/1/vmw_2.png)
+![](img/1/vmw_3.png)
+![](img/1/vmw_4.png)
+![](img/1/vmw_5.png)
+![](img/1/vmw_6.png)
 
 ## Programas básicos
 
@@ -27,11 +34,11 @@ sudo tasksel install lamp-server
 
 Si hacemos `apache2 -v`, vemos que aparece la versión:
 
-> TODO foto
+![](img/1/apache_1.png)
 
 Podemos comprobar que se está ejecutando con `ps aux | grep apache`:
 
-> TODO foto
+![](img/1/apache_2.png)
 
 ### cURL
 
@@ -39,16 +46,13 @@ cURL está instalado por defecto, así que no será necesario ponerlo a mano.
 
 ## Configurando la interfaz de red
 
-Por fortuna, VMWare asigna una red *host only* [por defecto]https://geek-university.com/configure-host-only-networking/#:~:text=In%20host%2Donly%20networking%2C%20a,on%20the%20host%20operating%20system., así que no nos será necesario configurar nada más del programa.
+Añadiremos un nuevo adaptador de red desde VMWare del tipo *host only*:
 
-Los planes de red se encuentran almacenados en `/etc/netplan`. Vamos a configurar el que viene por defecto para fijar las IPs. En m1, será `192.168.121.128`, mientras que en m2 `192.168.121.129`. Para ello, [ponemos lo siguiente](https://linuxconfig.org/how-to-configure-static-ip-address-on-ubuntu-18-04-bionic-beaver-linux):
+![](img/1/host_only.png)
 
-```
+Los planes de red se encuentran almacenados en `/etc/netplan`. Vamos a añadir un nuevo adaptador `host-only` y configurarlo para fijar las IPs. En m1, será `192.168.49.128`, mientras que en m2 `192.168.49.129`. Para ello, [ponemos lo siguiente](https://linuxconfig.org/how-to-configure-static-ip-address-on-ubuntu-18-04-bionic-beaver-linux):
 
-```
-
-
-## Contectándolas
+![](img/1/netplan.png)
 
 Vamos a crear dos páginas sencillas en las máquinas virtuales. Ponemos los siguientes archivos en `/var/www/html/swap.html`:
 
@@ -73,6 +77,6 @@ Y en m2:
 </html>
 ```
 
-Si desde el host hacemos `curl http://192.168.121.128/swap.html`, obtenemos
+Si desde el host hacemos `curl http://192.168.49.128/swap.html`, obtenemos
 
-![](./img/1/curl_win.png)
+![](./img/1/curl.png)
