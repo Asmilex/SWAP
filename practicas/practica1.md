@@ -34,6 +34,8 @@ En esta práctica instalaremos y configuraremos dos máquinas virtuales de Ubunt
 
 Para ver que todo funciona correctamente, usaremos la herramienta `curl` con el fin de solicitar una pequeña página web específica de cada VM. De esa forma, comprobaremos que Apache está propiamente configurado.
 
+Esta documentación se encuentra disponible en [Github](http://github.com/Asmilex/SWAP)
+
 # Arrancando la máquina virtual
 
 Antes de comenzar, debemos instalar ambos sistemas en **VMWare**. Se intentó hacerlo en VirtualBox, pero un `Kernel panic - not syncing: Attempted to kill the idle task` no me permitía iniciarlo. ¿Quizás sea debido a que estoy en Windows 11 insiders, y no se lleva bien con VirtualBox? Como alternativa probé con Hyper-V, pero los 8GB de RAM de mi portátil no permitía iniciar la máquina.
