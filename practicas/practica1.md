@@ -116,6 +116,60 @@ Para añadir varias cookies en la misma orden, basta con poner `-b cookie` todas
 
 Se pueden guardar las cookies en disco con la opción `-c nombre_archivo.txt`. De esta forma, podremos reutilizarlas usando `-b nombre_archivo.txt`
 
+## Apache
+
+La carpeta de [configuración para Apache](https://www.howtodojo.com/install-apache-mysql-php-lamp-stack-on-ubuntu-15-04/) se encuentra en `/etc/apache2`, siendo el archivo principal de configuración `/etc/apache2/apache2.conf`.
+
+En este archivo, podemos [cambiar algunos parámetros](https://bitacoralinux.es/configuracion-de-apache2-conf/) como el archivo de configuración de puertos (siendo por defecto `Include ports.conf`), el nivel de logs, el timeout, ServerRoot...
+
+Para alojar los archivos `.html`, se utiliza por defecto el directorio `/var/www/html`. Más adelante mostraremos un ejemplo de uso de esta carpeta.
+
+### Hosts virtuales
+
+Los hosts virtuales [nos permiten](https://towardsdatascience.com/how-to-host-multiple-website-with-apache-virtual-hosts-4423bd0aefbf) alojar múltiples páginas web en un único servidor.
+
+Para configurar un host virtual, debemos crear un archivo en la carpeta `/etc/apache2/sites-available/`. Este archivo debe tener el mismo nombre que el host virtual que queremos crear. Por ejemplo, si queremos crear un host virtual para la página web `example.com`, debemos crear el archivo `example.com.conf` en la carpeta `/etc/apache2/sites-available/`. Este archivo debe ser similar al ejemplo del blog enlazado al principio de esta sección:
+
+```
+<VirtualHost *:80>
+    ServerAdmin email@gmail.com
+    ServerName example.com
+    ServerAlias www.example.com
+    DocumentRoot /var/www/example.com/public_html
+    <Directory /var/www/example.com/public_html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    <IfModule mod_dir.c>
+        DirectoryIndex index.php index.pl index.cgi index.html index.xhtml index.htm
+    </IfModule>
+</VirtualHost>
+```
+
+Para habilitarlo, se usar el comando `sudo a2ensite example.com.conf`. Si queremos activar los certificados SSL, usamos `sudo certbot --apache -d example.com -d www.example.com`.
+
+Finalmente, se aplica la configuración reiniciando el servicio de Apache con `sudo systemctl restart apache2`. Con esto, debería estar listo.
+
+### Redirección de puertos
+
+Si se quiere redireccionar el puerto 80 al 8080, [hacemos lo siguiente](https://bobcares.com/blog/redirect-port-80-to-8080-apache/):
+
+1. Crear el archivo `/etc/apache2/other/port8080-redirect.conf`.
+2. Usar la siguiente configuración:
+
+```
+<VirtualHost _default_:80>
+DocumentRoot /ruta/a/la/pagina/web
+RewriteEngine On
+# Redirect all requests to the local Apache server to port 8080
+RewriteRule ^.*$ http://%{HTTP_HOST}:8080%{REQUEST_URI}
+</VirtualHost>
+```
+3. Reiniciar el servicio.
+
 # Configurando la interfaz de red
 
 Añadiremos un nuevo adaptador de red desde VMWare del tipo *host only*:
