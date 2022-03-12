@@ -90,7 +90,7 @@ Usando la opción `-0` o `--http1.0`, le decimos a cURL que queremos utilizar la
 
 Por defecto, cURL escribe los contenidos a `stdout`. Este comportamiento se puede modificar usando `-o {archivo}`. Por ejemplo, si quisiéramos guardar [el resultaod de la salida] al conectarnos a  nuestras máquinas, podemos escribir
 
-```
+```bash
 curl http://192.168.49.128/swap.html -o log_curl.txt
 ```
 
@@ -110,7 +110,7 @@ Mientras que para mandarlo, utilizamos `-d` seguido del JSON que queramos adjunt
 
 Esta herramienta permite [añadir cookies](https://catonmat.net/cookbooks/curl/set-cookies) a las peticiones que hagamos. Para ello, basta con utilizar el parámetro `-b` o `--cookie`
 
-```
+```bash
 curl -b '{nombre_cookie}={valor}' {url}
 ```
 
@@ -126,7 +126,7 @@ La carpeta de [configuración para Apache](https://www.howtodojo.com/install-apa
 
 ![](./img/1/apache_config.png)
 
-En este archivo, podemos [cambiar algunos parámetros](https://bitacoralinux.es/configuracion-de-apache2-conf/) como el archivo de configuración de puertos (siendo por defecto `Include ports.conf`), el nivel de logs, el timeout, ServerRoot...
+En este archivo, podemos [cambiar algunos parámetros](https://bitacoralinux.es/configuracion-de-apache2-conf/) como el archivo de configuración de puertos (por defecto, `Include ports.conf`), el nivel de logs, el timeout, ServerRoot...
 
 Para alojar los archivos `.html`, se utiliza por defecto el directorio `/var/www/html`. Más adelante mostraremos un ejemplo de uso de esta carpeta.
 
@@ -196,6 +196,18 @@ El archivo de configuración de SSH se encuentra en `/etc/ssh/sshd_config`:
 
 Si quisiéramos cambiar el puerto, simplemente cambiamos el parámetro `Port 22` al que queramos. De momento, lo dejaremos en el que viene por defecto.
 
+Podemos ver un ejemplo de cómo utilizar este programa en la sección [*Uso de SSH*](#uso-de-ssh)
+
+### Conexión sin contraseña
+
+Si queremos loggearnos en las máquinas sin necesidad de poner la contraseña, tenemos que hacer lo siguiente:
+
+1. Generar un nuevo par de claves SSH con `ssh-keygen`.
+2. Modificar el archivo `/etc/ssh/sshd_config` poniendo `PermitRootLogin yes`.
+3. Copiar la clave a la otra máquina con `ssh-copy-id`. En mi caso, para mandarla de M1 a M2, ponemos `ssh-copy-id amilmun@192.168.121.131`.
+
+![](img/1/ssh_2.png)
+
 # Configurando la interfaz de red
 
 Añadiremos un nuevo adaptador de red desde VMWare del tipo *host only*:
@@ -237,7 +249,7 @@ Si desde el host hacemos `curl http://192.168.49.128/swap.html`, obtenemos
 
 ![](./img/1/curl.png)
 
-# SSH
+# Uso de SSH
 
 Vamos a conectar las dos máquinas mediante SSH. Para acceder desde M1 a M2, ponemos
 
@@ -248,11 +260,3 @@ ssh 192.168.121.131
 Y obtenemos
 
 ![](img/1/ssh_1.png)
-
-Si queremos loggearnos en las máquinas sin necesidad de poner la contraseña, tenemos que hacer lo siguiente:
-
-1. Generar un nuevo par de claves SSH con `ssh-keygen`.
-2. Modificar el archivo `/etc/ssh/sshd_config` poniendo `PermitRootLogin yes`.
-3. Copiar la clave a la otra máquina con `ssh-copy-id`. En mi caso, para mandarla de M1 a M2, ponemos `ssh-copy-id amilmun@192.168.121.131`.
-
-![](img/1/ssh_2.png)
