@@ -6,7 +6,7 @@ link-citations: true
 date: \today
 
 titlepage: true,
-titlepage-color: "3C9F53"
+titlepage-color: "22a6b3"
 titlepage-text-color: "FFFFFF"
 titlepage-rule-color: "FFFFFF"
 titlepage-rule-height: 2
@@ -82,6 +82,10 @@ Podemos comprobar que se está ejecutando con `ps aux | grep apache`:
 
 Podemos especificar el tipo de petición que estamos haciendo con cURL. Por defecto, se utiliza `GET`. Si queremos utilizar otro tipo, podemos usar `-X` después del comando `curl`. Por ejemplo: `curl -X POST {url}`. Se puede mandar información gracias a `-d`. Al usarlo, no será necesario poner `-X POST`, [puesto que se infiere](https://daniel.haxx.se/blog/2015/09/11/unnecessary-use-of-curl-x/).
 
+#### Especificar la versión de http
+
+Usando la opción `-0` o `--http1.0`, le decimos a cURL que queremos utilizar la versión 1.0 de http. Alternativamente, se puede usar `--http1.1` o `--http2`.
+
 #### Redireccionando la salida
 
 Por defecto, cURL escribe los contenidos a `stdout`. Este comportamiento se puede modificar usando `-o {archivo}`. Por ejemplo, si quisiéramos guardar [el resultaod de la salida] al conectarnos a  nuestras máquinas, podemos escribir
@@ -107,7 +111,7 @@ Mientras que para mandarlo, utilizamos `-d` seguido del JSON que queramos adjunt
 Esta herramienta permite [añadir cookies](https://catonmat.net/cookbooks/curl/set-cookies) a las peticiones que hagamos. Para ello, basta con utilizar el parámetro `-b` o `--cookie`
 
 ```
-curl -b '{nombre_cookie=valor}' {url}
+curl -b '{nombre_cookie}={valor}' {url}
 ```
 
 Por ejemplo, si queremos mandarle la sesión activa a la dirección: `curl -b 'session=amilmun' https://localhost/...`.
@@ -120,13 +124,25 @@ Se pueden guardar las cookies en disco con la opción `-c nombre_archivo.txt`. D
 
 La carpeta de [configuración para Apache](https://www.howtodojo.com/install-apache-mysql-php-lamp-stack-on-ubuntu-15-04/) se encuentra en `/etc/apache2`, siendo el archivo principal de configuración `/etc/apache2/apache2.conf`.
 
+![](./img/1/apache_config.png)
+
 En este archivo, podemos [cambiar algunos parámetros](https://bitacoralinux.es/configuracion-de-apache2-conf/) como el archivo de configuración de puertos (siendo por defecto `Include ports.conf`), el nivel de logs, el timeout, ServerRoot...
 
 Para alojar los archivos `.html`, se utiliza por defecto el directorio `/var/www/html`. Más adelante mostraremos un ejemplo de uso de esta carpeta.
 
+![](./img/1/www.png)
+
+### Puertos de Apache
+
+Si quisiéramos cambiar los puertos de Apache, debemos irnos al archivo `/etc/apache2/ports.conf` y cambiar el valor de `Listen` por el que queremos.
+
+![](img/1/apache_ports.png)
+
 ### Hosts virtuales
 
 Los hosts virtuales [nos permiten](https://towardsdatascience.com/how-to-host-multiple-website-with-apache-virtual-hosts-4423bd0aefbf) alojar múltiples páginas web en un único servidor.
+
+![Configuración del host por defecto](img/1/sites.png)
 
 Para configurar un host virtual, debemos crear un archivo en la carpeta `/etc/apache2/sites-available/`. Este archivo debe tener el mismo nombre que el host virtual que queremos crear. Por ejemplo, si queremos crear un host virtual para la página web `example.com`, debemos crear el archivo `example.com.conf` en la carpeta `/etc/apache2/sites-available/`. Este archivo debe ser similar al ejemplo del blog enlazado al principio de esta sección:
 
@@ -170,11 +186,25 @@ RewriteRule ^.*$ http://%{HTTP_HOST}:8080%{REQUEST_URI}
 ```
 3. Reiniciar el servicio.
 
+## SSH
+
+Hay una opción para poner SSH durante la instalación inicial de Ubuntu Server, así que se ha marcado.
+
+El archivo de configuración de SSH se encuentra en `/etc/ssh/sshd_config`:
+
+![](./img/1/ssh_config.png)
+
+Si quisiéramos cambiar el puerto, simplemente cambiamos el parámetro `Port 22` al que queramos. De momento, lo dejaremos en el que viene por defecto.
+
 # Configurando la interfaz de red
 
 Añadiremos un nuevo adaptador de red desde VMWare del tipo *host only*:
 
 ![](img/1/host_only.png)
+
+Podríamos configurar algunas opciones avanzadas del adaptador, como la MAC o simular un throttling de la red. No nos será necesario, así que no lo haremos
+
+![](img/1/adaptador.png)
 
 Los planes de red se encuentran almacenados en `/etc/netplan`. Vamos a añadir un nuevo adaptador `host-only` y configurarlo para fijar las IPs. En m1, será `192.168.49.128`, mientras que en m2 `192.168.49.129`. Para ello, [ponemos lo siguiente](https://linuxconfig.org/how-to-configure-static-ip-address-on-ubuntu-18-04-bionic-beaver-linux):
 
