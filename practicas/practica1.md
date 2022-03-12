@@ -1,6 +1,6 @@
 ---
 title: Preparación de las herramientas de SWAP
-author: Andrés Millán Muñoz
+author: Andrés Millán Muñoz (*amilmun@correo.ugr.es*)
 keywords: [SWAP, servidores, servers, cloud computing, vm]
 link-citations: true
 date: \today
