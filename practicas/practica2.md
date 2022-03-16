@@ -109,7 +109,16 @@ ssh-copy-id 192.168.49.128 # M2 -> M1
 
 # Automatizando la copia con Crontab
 
-Crontab es una herramienta dedicada a la ejecución de programas en una determinada franja de tiempo. Cada minuto, revisará su archivo de configuración, vigilando si ha llegado el momento correcto de ejecutar alguna orden específica.
+Crontab es una herramienta dedicada a la ejecución de programas en una determinada franja de tiempo. Cada minuto, revisará su archivo de configuración, vigilando si ha llegado el momento correcto de ejecutar alguna orden específica. El archivo de configuración se encuentra en `/etc/crontab`.
+
+Nosotros usaremos crontab desde M1 para sincronizar los contenidos de la carpeta `/var/www`, duplicando así la página web en M2. La página [crontab.guru](https://crontab.guru/every-1-hour) resulta muy útil para configurar el programa.
+
+Añadimos la línea
+
+```bash
+# Execute crontab every hour to copy /var/www to M2
+0 * * * * rsync -avz /var/www amilmun@192.168.49.129:/var/www
+```
 
 # Cosas que tengo que decir:
 
