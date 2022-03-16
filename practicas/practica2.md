@@ -30,6 +30,8 @@ urlcolor: RoyalBlue
 
 En esta práctica vamos a automatizar la copia de archivos de una máquina virtual a otra. Para ello, usaremos las herramientas SSH, rsync y crontab. Veremos cómo configurar los respectivos programas para llevar a cabo esta tarea.
 
+> Nota: las IPs de las máquinas son `192.168.49.128` (M1) y `192.168.49.129` (M2).
+
 # Copiando archivos de una máquina a otra
 
 Tenemos varias opciones para traspasar archivos de una máquina a otra.
@@ -76,6 +78,8 @@ Como dice el guion, para probar su funcionamiento, vamos a copiar un directorio 
 rsync -avz {/path/a/dir} {usuario}@{ip}:{path/a/dir}
 ```
 
+![](img/2/rsync_2.png)
+
 ## Parámetros de rsync
 
 ### Excluir archivos o subdirectorios
@@ -120,10 +124,7 @@ Añadimos la línea
 0 * * * * rsync -avz /var/www amilmun@192.168.49.129:/var/www
 ```
 
-# Cosas que tengo que decir:
-
-- Ya hice lo de SSH copy id
-- IP m1: `192.168.49.128`, m2: `192.168.49.129`.
+![](./img/2/crontab.png)
 
 # Herramientas usadas
 
