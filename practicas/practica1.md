@@ -28,6 +28,8 @@ linkcolor: RoyalBlue
 urlcolor: RoyalBlue
 ---
 
+<!-- LTeX: language=spanish -->
+
 # Objetivos
 
 En esta práctica instalaremos y configuraremos dos máquinas virtuales de Ubuntu Server mediante VMWare. En particular, pondremos a punto una instalación de Apache, PHP, MySQL, SSH; así como la interfaz de red necesaria para comunicar ambas máquinas con el host y entre ellas mismas.
