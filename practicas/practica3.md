@@ -148,8 +148,11 @@ A continuación, instalaremos y configuraremos `haproxy`, de manera similar a `n
 Antes de comenzar, debemos deshabilitar `nginx`, puesto que en caso contrario, ambos programas estarían luchando por el mismo puerto. Podemos conseguirlo con
 
 ```bash
-sudo service nginx stop
+sudo service nginx stop  # solo para esta sesión
+sudo systemctl disable nginx
 ```
+
+### Instalación y configuración básica
 
 Para instalar `haproxy`, debemos escribir el siguiente comando:
 
@@ -175,6 +178,24 @@ De esta forma, hemos creado un frontend que recibe conexiones http desde el puer
 
 Para comprobar que funciona corerctamente, podemos hacer `curl 192.168.49.130/swap.html`. Dado que la salida es la misma que la que tuvimos con `nginx`, omitiré el pantallazo.
 
+### Haproxy con ponderación
+
+Podemos configurar haproxy con ponderación usando el parámetro `weight {peso}`:
+
+![](img/3/haproxy_ponderacion.png)
+
+### Otras opciones de Haproxy
+
+Como era de esperar, haproxy tiene muchas opciones diversas de configuración. En esta sección vamos a describir algunas de ellas; las que resulten más destacables.
+
+- La clave `global` permite evitar la redundancia de código en el archivo de configuración. Se aplica tanto a backend como a frontend.
+- La clave `defaults` tiene el mismo efecto, pero para los backends.
+- Con respecto al backend:
+  - Se puede seleccionar el tipo de balanceo con `balance {clave}`. Por defecto, se usa `roundrobin`.
+  - Podemos inyectar una cookie utilizada por el balanceador para distribuir las solicitudes futuras al mismo server.
+
+![](img/3/haproxy_avanzado.png)
+
 # Estadísticas
 
 Una de las ventajas que ofrece `haproxy` es la facilidad para habilitar las estadísticas del balanceador. Para conseguirlo, modificamos la configuración, dejándola de la siguiente manera:
@@ -186,6 +207,14 @@ Podemos acceder a la página desde el navegador entrando en `http://192.168.49.1
 ![](./img/3/stats_login.png)
 ![](./img/3/stats_webpage.png)
 
+Algunas de las modificaciones interesantes que podemos hacer son las siguientes:
+- Se puede añadir la clave `stats refresh 10s` al archivo de configuración para decirle que refresque cada 10 segundos.
+- `stats admin if TRUE` hace un bypass del login. Podría ser útil para debuggear.
+- El timeout por defecto es 10s. Se puede cambiar con `stats timeout {n}s`.
+
+La descripció de cada columna se puede hallar en [esta entrada del blog de Haproxy](https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/). Resulta especialmente útil como manual.
+
+![](img/3/stats_avanzado.png)
 
 # Go-between
 
@@ -197,3 +226,8 @@ Podemos acceder a la página desde el navegador entrando en `http://192.168.49.1
 
 - https://www.cyberciti.biz/faq/systemd-systemctl-view-status-of-a-service-on-linux/
 - https://linuxhint.com/what-is-keepalive-in-nginx/
+- https://documentation.suse.com/smart/linux/html/reference-systemctl-enable-disable-services/index.html
+- https://www.haproxy.com/blog/the-four-essential-sections-of-an-haproxy-configuration/#:~:text=There%20are%20four%20essential%20sections,routed%20to%20your%20backend%20servers.
+- https://support.ptc.com/help/thingworx/platform/r9/es/index.html#page/ThingWorx/Help/ThingWorxHighAvailability/HAProxyExample.html
+- https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/
+- https://cbonte.github.io/haproxy-dconv/1.7/configuration.html
