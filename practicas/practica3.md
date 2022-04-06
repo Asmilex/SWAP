@@ -261,7 +261,7 @@ backend_connection_timeout = "2s"
       "192.168.49.129:80 weight=1"
     ]
 
-    [servers.balanceo_aamilmun.healthcheck]
+    [servers.balanceo_amilmun.healthcheck]
     fails = 1
     passes = 1
     interval = "2s"
@@ -275,7 +275,16 @@ backend_connection_timeout = "2s"
 - El peso se puede cambiar con `{url_server:puerto} weight={peso}`.
 - `leastconn` obliga a gobetween a seleccionar el backend con menos conexiones.
 - `max_connections = {valor}` dicta el número máximo de conexiones al servidor. Otros parámetros relacionados son `client_idle_timeout`, `backend_idle_timeout` y `backend_connection_timeout`.
-- En el apartado `[servers.balanceo_aamilmun.healthcheck]` se puede configurar parámetros similares al anterior. No entraré en detalle, puesto que viene en el código anterior bien puesto; y son muy similares a los del resto de balanceadores.
+- En el apartado `[servers.balanceo_amilmun.healthcheck]` se puede configurar parámetros similares al anterior. No entraré en detalle, puesto que viene en el código anterior bien puesto; y son muy similares a los del resto de balanceadores.
+
+# Zevenet
+
+Para instalar Zevenet debemos proceder de manera algo diferente. Esto no es un programa como tal; sino una distribución. Proporcionan una ISO o un contenedor Docker. Nosotros optaremos por la primera opción.
+
+Es importante añadir las tarjetas de red antes de iniciar la instalación del sistema. De esta forma, Zevenet configurará correctamente la red.
+
+192.168.49.131
+
 
 # Pound
 
