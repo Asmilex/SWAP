@@ -218,6 +218,65 @@ La descripció de cada columna se puede hallar en [esta entrada del blog de Hapr
 
 # Go-between
 
+El siguiente balanceador que usaremos será `gobetween`.
+
+Como antes, debemos deshabilitar cualquier otro balanceador que estuviera activo. En nuestro caso, ahora mismo es `haproxy`.
+
+Debemos instalarlo [a mano](https://github.com/yyyar/gobetween/wiki/Installation):
+
+```bash
+mkdir gobetween
+cd gobetween
+curl -s https://api.github.com/repos/yyyar/gobetween/releases | grep browser_download_url | grep linux_amd64 | cut -d '"' -f 4 | head -n 1 | wget -i -
+tar -zxvf *.tar.gz
+nano config/gobetween.toml
+sudo gobetween -c config/gobetween.toml
+```
+
+El archivo por defecto que viene está bastante completo. De hecho, tiene un ejemplo de tamaño considerable dentro del propio `.toml`.
+
+Las que usaremos serán:
+
+```toml
+...
+[metrics]
+enabled = true
+...
+
+[servers]
+[servers.balanceo_aamilmun]
+bind = "192.168.49.130:80"
+protocol = "tcp"
+balance = "roundrobin"
+
+max_connections = 10000
+client_idle_timeout = "10m"
+backend_idle_timeout = "10m"
+backend_connection_timeout = "2s"
+
+    [servers.balanceo_aamilmun.discovery]
+    kind = "static"
+    static_list = [
+      "192.168.49.128:80 weight=2",
+      "192.168.49.129:80 weight=1"
+    ]
+
+    [servers.balanceo_aamilmun.healthcheck]
+    fails = 1
+    passes = 1
+    interval = "2s"
+    timeout = "1s"
+    kind = "ping"
+    ping_timeout_duration = "500ms"
+```
+
+![](img/3/gobetween.png)
+
+- El peso se puede cambiar con `{url_server:puerto} weight={peso}`.
+- `leastconn` obliga a gobetween a seleccionar el backend con menos conexiones.
+- `max_connections = {valor}` dicta el número máximo de conexiones al servidor. Otros parámetros relacionados son `client_idle_timeout`, `backend_idle_timeout` y `backend_connection_timeout`.
+- En el apartado `[servers.balanceo_aamilmun.healthcheck]` se puede configurar parámetros similares al anterior. No entraré en detalle, puesto que viene en el código anterior bien puesto; y son muy similares a los del resto de balanceadores.
+
 # Pound
 
 # Análisis comparativo
