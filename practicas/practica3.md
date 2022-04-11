@@ -281,9 +281,34 @@ backend_connection_timeout = "2s"
 
 Para instalar Zevenet debemos proceder de manera algo diferente. Esto no es un programa como tal; sino una distribución. Proporcionan una ISO o un contenedor Docker. Nosotros optaremos por la primera opción.
 
-Es importante añadir las tarjetas de red antes de iniciar la instalación del sistema. De esta forma, Zevenet configurará correctamente la red.
+Es importante añadir las tarjetas de red antes de iniciar la instalación del sistema. De esta forma, Zevenet configurará correctamente la red. En la instalación, debemos marcar la tarjeta `eth1`:
 
-192.168.49.131
+![](img/3/zevenet_network.png)
+
+Para la IP usaremos `192.168.49.131`. Aunque lo pondremos en el instalador, realmente, esto es irrelevante, puesto que luego lo configuraremos con netplan. El resto de parámetros tomarán el valor que viene por defecto. El hostname y la contraseña se ha configurado para ser los mismos que en el resto de máquinas.
+
+![](img/3/zevenet_ip.png)
+
+Una vez instalado, nos podemos loggear con usuario `root` y contraseña `Swap1234`.
+
+![](img/3/zevenet.png)
+
+Aplicamos el siguiente netplan:
+
+![](img/3/zevenet_netplan.png)
+
+Podemos configurar el balanceador accediendo desde el navegador a la página `https://192.168.49.131:444/`, usando los mismos credenciales que utilizamos para loggearnos:
+
+![](img/3/zevenet_dashboard.png)
+
+Para crear el balanceo, podemos irnos a LSLB -> Farms. Creamos una nueva granja, añadiendo los backend M1 y M2:
+
+![](img/3/zevenet_1.png)
+![](img/3/zevenet_2.png)
+
+Con esto, el balanceador está funcionando. La persistencia del servicio se puede activar con la opción `persistence`:
+
+![](img/3/zevenet_3.png)
 
 # Pound
 
@@ -316,8 +341,20 @@ Algunos parámetros interesantes que podemos modificar son...
 - `Alive {valor (s)}`: es el periodo de tiempo que el servidor esperará a que el backend responda.
 - `Client {valor (s)}`: es el periodo de tiempo que el servidor esperará a que el cliente responda. Pasado este tiempo, el servidor cortará la conexión.
 - `TimeOut {valor (s)}`: periodo de tiemp que Pound esperará al BackEnd para una respuesta.
+- Se puede configurar un backend de emergencia con `Emergency`. Este se activará cuando el resto falle. La configuración sería idéntica a la que hemos hecho con `BackEnd` (a excepción de las IPs).
+-
 
 # Análisis comparativo
+
+Para comprobar cuál de todos los balanceadores que hemos instalado se comporta mejor, usaremos la herramienta `ab`. Los benchmarks que usaremos serán los siguientes:
+
+| Clientes | Número de peticiones concurrentes |
+|:---------|:----------------------------------|
+| 10000    | 10                                |
+| 10000    | 20                                |
+| 5000     | 10                                |
+
+Desde el host, haremos `ab -l -n {clientes} -c {peticiones} -i http://192.168.49.130/swap.html`
 
 # Bibliografía
 
