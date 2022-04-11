@@ -285,8 +285,37 @@ Es importante añadir las tarjetas de red antes de iniciar la instalación del s
 
 192.168.49.131
 
-
 # Pound
+
+Pound es un servidor proxy reverso y balanceador de carga sencillo.
+
+La instalación de este programa será algo diferente. Pound no se encuentra en los repositorios de Ubuntu server 18.04, pero podemos bajarnos directamente el archivo `.deb`:
+
+```bash
+sudo apt-get update && sudo apt-get upgrade
+wget http://launchpadlibrarian.net/384724960/init-system-helpers_1.54_all.deb
+wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pound/pound_2.8-2_amd64.deb
+sudo dpkg -i init-system-helpers_1.54_all.deb
+sudo dpkg -i pound_2.8-2_amd64.deb
+```
+
+En el proceso hemos tenido que actualizar `init-system-helpers`, puesto que no cumplía el requisito de que la versión debe ser mayor o igual a 1.54.
+
+El archivo de configuración se encuentra en `/etc/pound/pound.cfg`. Una configuración básica para nuestro escenario sería la siguiente:
+
+![](img/3/pound_basico.png)
+
+Para iniciarlo, primero modificamos el archivo `/etc/default/pound` poniendo `startup=1`. Luego, hacemos `systemctl restart pound.service`. Nos pide loggearnos, por lo que usamos nuestra contraseña del usuario (`Swap1234`).
+
+Añadiendo el parámetro `Priority {valor entre 1 y 9}`, modificamos los pesos.
+
+![](img/3/pound_priority.png)
+
+Algunos parámetros interesantes que podemos modificar son...
+
+- `Alive {valor (s)}`: es el periodo de tiempo que el servidor esperará a que el backend responda.
+- `Client {valor (s)}`: es el periodo de tiempo que el servidor esperará a que el cliente responda. Pasado este tiempo, el servidor cortará la conexión.
+- `TimeOut {valor (s)}`: periodo de tiemp que Pound esperará al BackEnd para una respuesta.
 
 # Análisis comparativo
 
@@ -299,3 +328,7 @@ Es importante añadir las tarjetas de red antes de iniciar la instalación del s
 - https://support.ptc.com/help/thingworx/platform/r9/es/index.html#page/ThingWorx/Help/ThingWorxHighAvailability/HAProxyExample.html
 - https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/
 - https://cbonte.github.io/haproxy-dconv/1.7/configuration.html
+- https://www.wikiwand.com/es/Pound_-_Servidor_Proxy_Reverso
+- https://www.apsis.ch/pound.html
+- https://www.tecmint.com/setting-up-pound-web-server-load-balancing-in-linux/
+- https://help.ubuntu.com/community/Pound
