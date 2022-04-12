@@ -316,7 +316,7 @@ Pound es un servidor proxy reverso y balanceador de carga sencillo.
 
 La instalación de este programa será algo diferente. Pound no se encuentra en los repositorios de Ubuntu server 18.04, pero podemos bajarnos directamente el archivo `.deb`:
 
-```bash
+```
 sudo apt-get update && sudo apt-get upgrade
 wget http://launchpadlibrarian.net/384724960/init-system-helpers_1.54_all.deb
 wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pound/pound_2.8-2_amd64.deb
@@ -346,15 +346,39 @@ Algunos parámetros interesantes que podemos modificar son...
 
 # Análisis comparativo
 
-Para comprobar cuál de todos los balanceadores que hemos instalado se comporta mejor, usaremos la herramienta `ab`. Los benchmarks que usaremos serán los siguientes:
+Para comprobar cuál de todos los balanceadores que hemos instalado se comporta mejor, usaremos la herramienta `ab`. Los benchmarks que usaremos serán los siguientes
 
-| Clientes | Número de peticiones concurrentes |
-|:---------|:----------------------------------|
-| 10000    | 10                                |
-| 10000    | 20                                |
-| 5000     | 10                                |
+Desde el host, haremos `ab -l -n 10000 -c 10 -i http://192.168.49.130/swap.html`. Generaremos el archivo de resultados en csv usando el parámetro `-g {archivo.csv}`. Este csv está preparado para mostrar los tiempos de respuesta con gnuplot. Además, guardaremos el tiempo medio de peticiones por segundo de cada balanceador
 
-Desde el host, haremos `ab -l -n {clientes} -c {peticiones} -i http://192.168.49.130/swap.html`
+| Balanceador             | Peticiones por segundo |
+|:------------------------|:-----------------------|
+| **Ngnix** (rr)          | `2708.30`                |
+| **Nginx** (weight)      | `2700.22`                |
+| **Haproxy** (rr)        | `1547.38`                |
+| **Haproxy** (weight)    | `1671.30`                |
+| **Zevenet** (rr)        | Error                  |
+| **Zevenet** (weight)    | Error                  |
+| **Go-between** (rr)     | `1550.48`                |
+| **Go-between** (weight) | `1537.70`                |
+| **Pound** (rr)          | `1286.97`                |
+| **Pound** (weight)      | `1247.06`                |
+
+
+
+## Sobre Zevenet
+
+No se ha podido hacer el benchmark de Zevenet. Cuando se ha intentado iniciar, sale un mensaje de error.
+
+![](img/3/zevenet_error.png)
+
+Mi sospecha es que se trata de un problema con la instalación del grub. Pero teniendo en cuenta que el causante de este fallo es un reinicio de la máquina, y esta es la quinta vez que he tenido que reinstalarla, no voy a considerar más este balanceador. Podría ser una combinación de la configuración de instalación, o de su uso con VMWare. En cualquier caso, es el único de los balanceadores que hemos instalado que ha producido tantos problemas. Ha sido una mala experiencia de usuario.
+
+## Tiempos de respuesta
+
+![](./img/3/pound_grafica.png)
+![](./img/3/haproxy_grafica.png)
+![](img/3/gobetween_grafica.png)
+![](img/3/nginx_grafica.png)
 
 # Bibliografía
 
