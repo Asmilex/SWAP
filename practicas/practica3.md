@@ -346,24 +346,28 @@ Algunos parámetros interesantes que podemos modificar son...
 
 # Análisis comparativo
 
-Para comprobar cuál de todos los balanceadores que hemos instalado se comporta mejor, usaremos la herramienta `ab`. Los benchmarks que usaremos serán los siguientes
+Para comprobar cuál de todos los balanceadores que hemos instalado se comporta mejor, usaremos la herramienta `ab`. Ambas máquinas sirven el mismo contenido, que está basado en la página html que creamos en la práctica 1 y sincronizamos entre las dos máquinas con `rsync` en la práctica 2.
 
-Desde el host, haremos `ab -l -n 10000 -c 10 -i http://192.168.49.130/swap.html`. Generaremos el archivo de resultados en csv usando el parámetro `-g {archivo.csv}`. Este csv está preparado para mostrar los tiempos de respuesta con gnuplot. Además, guardaremos el tiempo medio de peticiones por segundo de cada balanceador
+Desde el host, haremos `ab -l -n 10000 -c 10 -i http://192.168.49.130/swap.html`. Generaremos el archivo de resultados en csv usando el parámetro `-g {archivo.csv}`. Este csv está preparado para mostrar los tiempos de respuesta con gnuplot. Además, guardaremos el tiempo medio de peticiones por segundo de cada balanceador:
 
 | Balanceador             | Peticiones por segundo |
 |:------------------------|:-----------------------|
-| **Ngnix** (rr)          | `2708.30`                |
-| **Nginx** (weight)      | `2700.22`                |
-| **Haproxy** (rr)        | `1547.38`                |
-| **Haproxy** (weight)    | `1671.30`                |
+| **Ngnix** (rr)          | `2708.30`              |
+| **Nginx** (weight)      | `2700.22`              |
+| **Haproxy** (rr)        | `1547.38`              |
+| **Haproxy** (weight)    | `1671.30`              |
 | **Zevenet** (rr)        | Error                  |
 | **Zevenet** (weight)    | Error                  |
-| **Go-between** (rr)     | `1550.48`                |
-| **Go-between** (weight) | `1537.70`                |
-| **Pound** (rr)          | `1286.97`                |
-| **Pound** (weight)      | `1247.06`                |
+| **Go-between** (rr)     | `1550.48`              |
+| **Go-between** (weight) | `1537.70`              |
+| **Pound** (rr)          | `1286.97`              |
+| **Pound** (weight)      | `1247.06`              |
 
+En general, **estos datos nos proporcionan un buen resumen** de cómo se comporta cada balanceador:
 
+![](img/3/comparativa.png)
+
+Hablaremos en profundidad sobre estos resultados en una sección posterior.
 
 ## Sobre Zevenet
 
@@ -375,10 +379,43 @@ Mi sospecha es que se trata de un problema con la instalación del grub. Pero te
 
 ## Tiempos de respuesta
 
-![](./img/3/pound_grafica.png)
-![](./img/3/haproxy_grafica.png)
-![](img/3/gobetween_grafica.png)
+La opción que hemos habilitado a la hora de hacer el benchmark nos permite sacar unas gráficas sobre el tiempo de respuesta:
+
 ![](img/3/nginx_grafica.png)
+
+![](./img/3/haproxy_grafica.png)
+
+![](img/3/gobetween_grafica.png)
+
+![](./img/3/pound_grafica.png)
+
+Estas gráficas son, en mi opinión, bastante más útiles que las medias. Nos muestran el tiempo de respuesta de cada petición con detalle. Es importante destacar que **se ordenan de menor a mayor** tiempo de respuesta. Esto nos permite comparar más a fondo cada balanceador.
+
+Por ejemplo, podemos ver que **Pound** ha tardado bastante más en procesar un 10% de las peticiones, siendo el percentil 1 particularmente elevado. Esto hace que la media se agrande considerablemente.
+
+Por otro lado, **Nginx** mantiene un 80% de las respuestas por debajo de 5 ms, lo cual compensa los 1%.
+
+Lo contrario ocurre con **Haproxy y Go-between**. Sus resultados son más consistentes, pero no mantienen una media especialmente baja.
+
+Estas gráficas también nos permiten ver claramente que **no hay apenas diferencia entre roundrobin y ponderación**. Esto es razonable, pues las dos máquinas usadas son idénticas y sirven el mismo contenido. La única diferencia es la carga que son capaces de soportar, teniendo en cuenta que ambas utilizan el mismo hardware virtualizado.
+
+## Sobre la fiabilidad de estos datos
+
+Primero, dejemos claro cuál es el punto de esta sección: **no creo que estos datos sean de confianza**. Tampoco creo que sirvan para hacer un análisis justo.
+
+A la hora de hacer pruebas, he notado que **el principal bottleneck es el host**. Se ha usado un portátil con un i5-8250U con 8GB de RAM en un NVME SSD. Para sacar los resultados, se han de tener abiertas 3 máquinas virtuales, con un editor (VSCode, basado en Electron) y algún que otro programa. Esto hace que se sature la RAM, y entre la paginación de disco en juego. Eso afecta severamente al benchmark. Por ejemplo, en la primera ejecución de `ab`, se observaban tiempos de respuesta tan altos como `3` segundos, un valor absurdamente alto comparado con los `6`ms de media. Tras varias ejecuciones, estos valores desaparecían. Mi hipótesis es que las máquinas entraban en primer plano, y el OS ponía en reposo algún otro proceso innecesario.
+
+Otro punto importante es la ausencia de solidez del experimento. No creo que un balanceador se pueda analizar basándonos en un par de máquinas en el backend. Estos programas suelen ser muy complejos y están preparados para escalas considerablemente mayores. En contrarpartida, este trabajo parace de juguete. Aún así, esto es normal, pues nos encontramos en una asignatura de universidad y no en un ámbito profesional. De todas formas, diferenciar entre roundrobin y ponderación en este caso puede resultar muy difícil.
+
+## Conclusión
+
+Si tuviera que elegir un balanceador basándonos en lo realizado en este documento, **personalmente priorizaría la experiencia de usuario**.
+
+Aunque Nginx claramente ha sido capaz de superar al resto de balanceadores en cuanto a peticiones por segundo, no sería capaz de juzgar cómo se comportaría en una hipotética escalada horizontal. Además, es un servicio preparado para servidores especialmente grandes. Quizás, un programa más compacto como Go-between o Haproxy funcionara mejor en mi caso.
+
+En esencia, la conclusión es que **todos han cumplido su cometido con mayor o menor facilidad**. Destacan negativamente los problemas de Zevenet, que pueden ser debidos a un error por mi parte. Aún así, me parece que es importante destacar los problemas que se han producido, pues es un aspecto importante a considerar.
+
+
 
 # Bibliografía
 
