@@ -18,7 +18,7 @@ toc: true
 numbersections: true
 
 header-left: "\\textcolor{gray}{\\thetitle}"
-header-right: "\\author"
+header-right: "Andrés Millán"
 footer-left: "\\hspace{1cm}"
 footer-center: "\\thepage"
 footer-right: "\\hspace{1cm}"
@@ -60,7 +60,7 @@ Se puede comprobar el estado del servicio con
 systemctl status nginx
 ```
 
-![Log con la instalación de `nginx`, activación del servicio y comprobación del estado](./img/3/nginx_status.png)
+![Log con la instalación de `nginx`, activación del servicio y comprobación del estado](./img/3/nginx_status.png){ width=450px }
 
 Para que actúe como balanceador, necesitamos deshabilitar la funcionalidad de servidor web. Para ello, editamos el archivo `/etc/nginx/nginx.conf`, comentado la línea
 
@@ -68,7 +68,7 @@ Para que actúe como balanceador, necesitamos deshabilitar la funcionalidad de s
 # include/etc/nginx/sites-enabled/*;
 ```
 
-![](img/3/nginx_config.png)
+![](img/3/nginx_config.png){ width=450px }
 
 Ahora debemos configurar el *upstream* con las direcciones de las máquinas virtuales. El archivo pertinente se encuentra en `/etc/nginx/conf.d/default.conf`, y debe tener el siguiente contenido:
 
@@ -88,13 +88,13 @@ server {
 }
 ```
 
-![](img/3/nginx_upstream.png)
+![](img/3/nginx_upstream.png){ width=450px }
 
 Una vez se ha configurado el archivo, se reinicia el servicio con `sudo service nginx restart`. Si todo ha ido bien, no debería dar ningún error.
 
 Usando curl desde el host, podemos comprobar que está funcionando:
 
-![](img/3/curl_balanceador.png)
+![](img/3/curl_balanceador.png){ width=400px }
 
 ## Otros tipos de configuración
 
@@ -109,7 +109,7 @@ upstream balanceo_amilmun {
 
 Por ejemplo, si ponemos m1 con peso 2, y m2 con peso 1, quedaría de la siguiente forma:
 
-![](./img/3/ponderacion.png)
+![](./img/3/ponderacion.png){ width=450px }
 
 Alternativamente, para usar un **balanceo por IP**, debemos indicar la directiva `ip_hash`:
 
@@ -121,11 +121,11 @@ upstream balanceo_amilmun {
 }
 ```
 
-![](./img/3/ip_hash.png)
+![](./img/3/ip_hash.png){ width=450px }
 
 Por último, podemos **mantener las conexiones activas** con `keepalive`. Para ello, usamos `keepalive {valor}`. Este `valor` limita el número de conexiones activas en idle almacenadas en cada máquina. Si se alcanza esta cifra, se cierra la conexión con la IP menos usada.
 
-![](img/3/keepalive.png)
+![](img/3/keepalive.png){ width=450px }
 
 ### Otros parámetros
 
@@ -139,7 +139,7 @@ Todos estos valores se pone tras la IP del servidor en el upstream:
 
 Un ejemplo de configuración final sería el siguiente:
 
-![](./img/3/ngnix_config_varia.png)
+![](./img/3/ngnix_config_varia.png){ width=450px }
 
 # Haproxy
 
@@ -168,11 +168,11 @@ sudo systemctl start haproxy
 sudo service haproxy start
 ```
 
-![](./img/3/haproxy_instalacion.png)
+![](./img/3/haproxy_instalacion.png){ width=450px }
 
 El archivo de configuración se encuentra en `/etc/haproxy/haproxy.cfg`. Haremos una configuración muy similar a la de `nginx`. Para conseguirlo, debemos editar el archivo, escribiendo lo siguiente:
 
-![](./img/3/haproxy_conf_basica.png)
+![](./img/3/haproxy_conf_basica.png){ width=450px }
 
 De esta forma, hemos creado un frontend que recibe conexiones http desde el puerto 80, y se las manda al backend `balanceo_amilmun`. Este backend tiene dos máquinas (m1 y m2), soportando cada máquina un número máximo de conexiones (`maxconn`) de 32 usuarios.
 
@@ -182,7 +182,7 @@ Para comprobar que funciona corerctamente, podemos hacer `curl 192.168.49.130/sw
 
 Podemos configurar haproxy con ponderación usando el parámetro `weight {peso}`:
 
-![](img/3/haproxy_ponderacion.png)
+![](img/3/haproxy_ponderacion.png){ width=450px }
 
 ### Otras opciones de Haproxy
 
@@ -194,13 +194,13 @@ Como era de esperar, haproxy tiene muchas opciones diversas de configuración. E
   - Se puede seleccionar el tipo de balanceo con `balance {clave}`. Por defecto, se usa `roundrobin`.
   - Podemos inyectar una cookie utilizada por el balanceador para distribuir las solicitudes futuras al mismo server.
 
-![](img/3/haproxy_avanzado.png)
+![](img/3/haproxy_avanzado.png){ width=450px }
 
 # Estadísticas
 
 Una de las ventajas que ofrece `haproxy` es la facilidad para habilitar las estadísticas del balanceador. Para conseguirlo, modificamos la configuración, dejándola de la siguiente manera:
 
-![](./img/3/haproxy_stats.png)
+![](./img/3/haproxy_stats.png){ width=450px }
 
 Podemos acceder a la página desde el navegador entrando en `http://192.168.49.130:9999/stats`:
 
@@ -214,7 +214,7 @@ Algunas de las modificaciones interesantes que podemos hacer son las siguientes:
 
 La descripció de cada columna se puede hallar en [esta entrada del blog de Haproxy](https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/). Resulta especialmente útil como manual.
 
-![](img/3/stats_avanzado.png)
+![](img/3/stats_avanzado.png){ width=450px }
 
 # Go-between
 
@@ -270,7 +270,7 @@ backend_connection_timeout = "2s"
     ping_timeout_duration = "500ms"
 ```
 
-![](img/3/gobetween.png)
+![](img/3/gobetween.png){ width=450px }
 
 - El peso se puede cambiar con `{url_server:puerto} weight={peso}`.
 - `leastconn` obliga a gobetween a seleccionar el backend con menos conexiones.
@@ -283,19 +283,19 @@ Para instalar Zevenet debemos proceder de manera algo diferente. Esto no es un p
 
 Es importante añadir las tarjetas de red antes de iniciar la instalación del sistema. De esta forma, Zevenet configurará correctamente la red. En la instalación, debemos marcar la tarjeta `eth1`:
 
-![](img/3/zevenet_network.png)
+![](img/3/zevenet_network.png){ width=450px }
 
 Para la IP usaremos `192.168.49.131`. Aunque lo pondremos en el instalador, realmente, esto es irrelevante, puesto que luego lo configuraremos con netplan. El resto de parámetros tomarán el valor que viene por defecto. El hostname y la contraseña se ha configurado para ser los mismos que en el resto de máquinas.
 
-![](img/3/zevenet_ip.png)
+![](img/3/zevenet_ip.png){ width=450px }
 
 Una vez instalado, nos podemos loggear con usuario `root` y contraseña `Swap1234`.
 
-![](img/3/zevenet.png)
+![](img/3/zevenet.png){ width=450px }
 
 Aplicamos el siguiente netplan:
 
-![](img/3/zevenet_netplan.png)
+![](img/3/zevenet_netplan.png){ width=450px }
 
 Podemos configurar el balanceador accediendo desde el navegador a la página `https://192.168.49.131:444/`, usando los mismos credenciales que utilizamos para loggearnos:
 
@@ -328,13 +328,13 @@ En el proceso hemos tenido que actualizar `init-system-helpers`, puesto que no c
 
 El archivo de configuración se encuentra en `/etc/pound/pound.cfg`. Una configuración básica para nuestro escenario sería la siguiente:
 
-![](img/3/pound_basico.png)
+![](img/3/pound_basica.png){ width=450px }
 
 Para iniciarlo, primero modificamos el archivo `/etc/default/pound` poniendo `startup=1`. Luego, hacemos `systemctl restart pound.service`. Nos pide loggearnos, por lo que usamos nuestra contraseña del usuario (`Swap1234`).
 
 Añadiendo el parámetro `Priority {valor entre 1 y 9}`, modificamos los pesos.
 
-![](img/3/pound_priority.png)
+![](img/3/pound_priority.png){ width=450px }
 
 Algunos parámetros interesantes que podemos modificar son...
 
@@ -342,7 +342,7 @@ Algunos parámetros interesantes que podemos modificar son...
 - `Client {valor (s)}`: es el periodo de tiempo que el servidor esperará a que el cliente responda. Pasado este tiempo, el servidor cortará la conexión.
 - `TimeOut {valor (s)}`: periodo de tiemp que Pound esperará al BackEnd para una respuesta.
 - Se puede configurar un backend de emergencia con `Emergency`. Este se activará cuando el resto falle. La configuración sería idéntica a la que hemos hecho con `BackEnd` (a excepción de las IPs).
--
+
 
 # Análisis comparativo
 
@@ -373,7 +373,7 @@ Hablaremos en profundidad sobre estos resultados en una sección posterior.
 
 No se ha podido hacer el benchmark de Zevenet. Cuando se ha intentado iniciar, sale un mensaje de error.
 
-![](img/3/zevenet_error.png)
+![](img/3/zevenet_error.png){ width=450px }
 
 Mi sospecha es que se trata de un problema con la instalación del grub. Pero teniendo en cuenta que el causante de este fallo es un reinicio de la máquina, y esta es la quinta vez que he tenido que reinstalarla, no voy a considerar más este balanceador. Podría ser una combinación de la configuración de instalación, o de su uso con VMWare. En cualquier caso, es el único de los balanceadores que hemos instalado que ha producido tantos problemas. Ha sido una mala experiencia de usuario.
 
