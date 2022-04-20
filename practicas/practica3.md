@@ -28,7 +28,7 @@ linkcolor: RoyalBlue
 urlcolor: RoyalBlue
 ---
 
-<!-- LTeX: language=spanish -->
+<!-- LTeX: language=es -->
 
 En esta práctica vamos a configurar un balanceador de carga para gestionar nuestras máquinas virtuales. Para ello, configuraremos una nueva VM, llamada `m3`, e instalaremos distintos tipos de software. Entre ellos, `nginx`, `haproxy`, ...
 
@@ -98,7 +98,7 @@ Usando curl desde el host, podemos comprobar que está funcionando:
 
 ## Otros tipos de configuración
 
-La configuración anterior utiliza round robin. Podmeos cambiar a un balanceador de carga **con prioridad** usando el parámetro `weight` en `default.conf`:
+La configuración anterior utiliza round robin. Podemos cambiar a un balanceador de carga **con prioridad** usando el parámetro `weight` en `default.conf`:
 
 ```bash
 upstream balanceo_amilmun {
@@ -107,7 +107,7 @@ upstream balanceo_amilmun {
 }
 ```
 
-Por ejemplo, si ponemos m1 con peso 2, y m2 con peso 1, quedaría de la siguiente forma:
+Por ejemplo, si ponemos M1 con peso 2, y M2 con peso 1, quedaría de la siguiente forma:
 
 ![](./img/3/ponderacion.png){ width=450px }
 
@@ -174,7 +174,7 @@ El archivo de configuración se encuentra en `/etc/haproxy/haproxy.cfg`. Haremos
 
 ![](./img/3/haproxy_conf_basica.png){ width=450px }
 
-De esta forma, hemos creado un frontend que recibe conexiones http desde el puerto 80, y se las manda al backend `balanceo_amilmun`. Este backend tiene dos máquinas (m1 y m2), soportando cada máquina un número máximo de conexiones (`maxconn`) de 32 usuarios.
+De esta forma, hemos creado un frontend que recibe conexiones http desde el puerto 80, y se las manda al backend `balanceo_amilmun`. Este backend tiene dos máquinas (M1 y M2), soportando cada máquina un número máximo de conexiones (`maxconn`) de 32 usuarios.
 
 Para comprobar que funciona corerctamente, podemos hacer `curl 192.168.49.130/swap.html`. Dado que la salida es la misma que la que tuvimos con `nginx`, omitiré el pantallazo.
 
@@ -208,11 +208,12 @@ Podemos acceder a la página desde el navegador entrando en `http://192.168.49.1
 ![](./img/3/stats_webpage.png)
 
 Algunas de las modificaciones interesantes que podemos hacer son las siguientes:
+
 - Se puede añadir la clave `stats refresh 10s` al archivo de configuración para decirle que refresque cada 10 segundos.
 - `stats admin if TRUE` hace un bypass del login. Podría ser útil para debuggear.
-- El timeout por defecto es 10s. Se puede cambiar con `stats timeout {n}s`.
+- El timeout por defecto es 10 s. Se puede cambiar con `stats timeout {n}s`.
 
-La descripció de cada columna se puede hallar en [esta entrada del blog de Haproxy](https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/). Resulta especialmente útil como manual.
+La descripción de cada columna se puede hallar en [esta entrada del blog de Haproxy](https://www.haproxy.com/blog/exploring-the-haproxy-stats-page/). Resulta especialmente útil como manual.
 
 ![](img/3/stats_avanzado.png){ width=450px }
 
@@ -289,7 +290,7 @@ Para la IP usaremos `192.168.49.131`. Aunque lo pondremos en el instalador, real
 
 ![](img/3/zevenet_ip.png){ width=450px }
 
-Una vez instalado, nos podemos loggear con usuario `root` y contraseña `Swap1234`.
+Una vez instalado, iniciamos sesión con usuario `root` y contraseña `Swap1234`.
 
 ![](img/3/zevenet.png){ width=450px }
 
@@ -297,7 +298,7 @@ Aplicamos el siguiente netplan:
 
 ![](img/3/zevenet_netplan.png){ width=450px }
 
-Podemos configurar el balanceador accediendo desde el navegador a la página `https://192.168.49.131:444/`, usando los mismos credenciales que utilizamos para loggearnos:
+Podemos configurar el balanceador accediendo desde el navegador a la página `https://192.168.49.131:444/`, usando los mismos credenciales del login del sistema:
 
 ![](img/3/zevenet_dashboard.png)
 
@@ -318,7 +319,7 @@ La instalación de este programa será algo diferente. Pound no se encuentra en 
 
 ```
 sudo apt-get update && sudo apt-get upgrade
-wget http://launchpadlibrarian.net/384724960/init-system-helpers_1.54_all.deb
+wget http://launchpadlibrarian.net/384724960/init-system-helpers_1.54_all.deb   # Requisito de Pound
 wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pound/pound_2.8-2_amd64.deb
 sudo dpkg -i init-system-helpers_1.54_all.deb
 sudo dpkg -i pound_2.8-2_amd64.deb
@@ -330,7 +331,7 @@ El archivo de configuración se encuentra en `/etc/pound/pound.cfg`. Una configu
 
 ![](img/3/pound_basica.png){ width=450px }
 
-Para iniciarlo, primero modificamos el archivo `/etc/default/pound` poniendo `startup=1`. Luego, hacemos `systemctl restart pound.service`. Nos pide loggearnos, por lo que usamos nuestra contraseña del usuario (`Swap1234`).
+Para iniciarlo, primero modificamos el archivo `/etc/default/pound` poniendo `startup=1`. Luego, hacemos `systemctl restart pound.service`. Nos pide los credenciales, por lo que usamos nuestra contraseña del usuario (`Swap1234`).
 
 Añadiendo el parámetro `Priority {valor entre 1 y 9}`, modificamos los pesos.
 
@@ -389,11 +390,11 @@ La opción que hemos habilitado a la hora de hacer el benchmark nos permite saca
 
 ![](./img/3/pound_grafica.png)
 
-Estas gráficas son, en mi opinión, bastante más útiles que las medias. Nos muestran el tiempo de respuesta de cada petición con detalle. Es importante destacar que **se ordenan de menor a mayor** tiempo de respuesta. Esto nos permite comparar más a fondo cada balanceador.
+Estas gráficas son, en mi opinión, bastante más útiles que las medias. Nos permitirán comparar más a fondo cada balanceador. Cada gráfica muestra el tiempo de respuesta requerido para cada petición, **ordenadas de menor a mayor**.
 
 Por ejemplo, podemos ver que **Pound** ha tardado bastante más en procesar un 10% de las peticiones, siendo el percentil 1 particularmente elevado. Esto hace que la media se agrande considerablemente.
 
-Por otro lado, **Nginx** mantiene un 80% de las respuestas por debajo de 5 ms, lo cual compensa los 1%.
+Por otro lado, **Nginx** mantiene un 80% de las respuestas por debajo de 5 ms, lo cual compensa el percentil 1.
 
 Lo contrario ocurre con **Haproxy y Go-between**. Sus resultados son más consistentes, pero no mantienen una media especialmente baja.
 
@@ -403,9 +404,9 @@ Estas gráficas también nos permiten ver claramente que **no hay apenas diferen
 
 Primero, dejemos claro cuál es el punto de esta sección: **no creo que estos datos sean de confianza**. Tampoco creo que sirvan para hacer un análisis justo.
 
-A la hora de hacer pruebas, he notado que **el principal bottleneck es el host**. Se ha usado un portátil con un i5-8250U con 8GB de RAM en un NVME SSD. Para sacar los resultados, se han de tener abiertas 3 máquinas virtuales, con un editor (VSCode, basado en Electron) y algún que otro programa. Esto hace que se sature la RAM, y entre la paginación de disco en juego. Eso afecta severamente al benchmark. Por ejemplo, en la primera ejecución de `ab`, se observaban tiempos de respuesta tan altos como `3` segundos, un valor absurdamente alto comparado con los `6`ms de media. Tras varias ejecuciones, estos valores desaparecían. Mi hipótesis es que las máquinas entraban en primer plano, y el OS ponía en reposo algún otro proceso innecesario.
+A la hora de hacer pruebas, he notado que **el principal bottleneck es el host**. Se ha usado un portátil con un i5-8250U con 8 GB de RAM en un NVME SSD. Para sacar los resultados, se han de tener abiertas 3 máquinas virtuales, con un editor (VSCode, basado en Electron) y algún que otro programa. Esto hace que se sature la RAM, y entre la paginación de disco en juego. Eso afecta severamente al benchmark. Por ejemplo, en la primera ejecución de `ab`, se observaban tiempos de respuesta tan altos como `3` segundos, un valor absurdamente alto comparado con los `6` ms de media. Tras varias ejecuciones, estos valores desaparecían. Mi hipótesis es que las máquinas entraban en primer plano, y el OS ponía en reposo algún otro proceso innecesario.
 
-Otro punto importante es la ausencia de solidez del experimento. No creo que un balanceador se pueda analizar basándonos en un par de máquinas en el backend. Estos programas suelen ser muy complejos y están preparados para escalas considerablemente mayores. En contrarpartida, este trabajo parace de juguete. Aún así, esto es normal, pues nos encontramos en una asignatura de universidad y no en un ámbito profesional. De todas formas, diferenciar entre roundrobin y ponderación en este caso puede resultar muy difícil.
+Otro punto importante es la ausencia de solidez del experimento. No creo que un balanceador se pueda analizar basándonos en un par de máquinas en el backend. Estos programas suelen ser muy complejos y están preparados para escalas considerablemente mayores. En contrarpartida, este trabajo es de juguete. Aun así, esto es normal, pues nos encontramos en una asignatura de universidad y no en un ámbito profesional; lo cual hace que diferenciar entre roundrobin y ponderación pueda resultar muy difícil.
 
 ## Conclusión
 
@@ -413,11 +414,9 @@ Si tuviera que elegir un balanceador basándonos en lo realizado en este documen
 
 Aunque Nginx claramente ha sido capaz de superar al resto de balanceadores en cuanto a peticiones por segundo, no sería capaz de juzgar cómo se comportaría en una hipotética escalada horizontal. Además, es un servicio preparado para servidores especialmente grandes. Quizás, un programa más compacto como Go-between o Haproxy funcionara mejor en mi caso.
 
-En esencia, la conclusión es que **todos han cumplido su cometido con mayor o menor facilidad**. Destacan negativamente los problemas de Zevenet, que pueden ser debidos a un error por mi parte. Aún así, me parece que es importante destacar los problemas que se han producido, pues es un aspecto importante a considerar.
+En esencia, la conclusión es que **todos han cumplido su cometido con mayor o menor facilidad**. Destacan negativamente los problemas de Zevenet, que pueden ser debidos a un error por mi parte. Aun así, me parece que es importante documentar los problemas que se han producido, pues es un aspecto a considerar.
 
-
-
-# Bibliografía
+# Referencias
 
 - https://www.cyberciti.biz/faq/systemd-systemctl-view-status-of-a-service-on-linux/
 - https://linuxhint.com/what-is-keepalive-in-nginx/
