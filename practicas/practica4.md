@@ -38,8 +38,25 @@ Como siempre, las IPs de las máquinas son las siguientes:
 - **M2**: `192.168.49.129`.
 - **M3**: `192.168.49.130`.
 
-# Certificado SSL
+# Fe de erratas
 
+Antes de comenzar la práctica, voy a explicar por qué todas mis prácticas anteriores eran incorrectas, y por qué me acabo de dar cuenta.
+
+Intentando hacer scp de M1 a M2 para copiar el certificado, me he encontrado con un error extraño. El archivo no se copiaba. O, mejor dicho, se copiaba a la misma máquina aún poniendo la IP correcta. Haciendo más pruebas, nos dimos cuenta de que M1 podía hacer ping a M2, pero M2 no podía a M1. Y desde el localhost, todo funcionaba bien.
+
+¿El error? El netplan estaba mal configurado.
+
+![Netplan de la práctica 1. Ahora es fácil adivinar el error](img/1/netplan.png)
+
+Aún limitando la IP a una sola, `dchp4: true` asigna una adicional. Esta no figura en `ifconfig`, pero sí en `ip a`.
+
+Es por estos motivos que SSH dio problemas al pasar de la práctica 1 a la 2; `rsync` no funcionó en la práctica 2; y es posible que no estuviéramos haciendo balanceo de carga en la práctica 3. Podría ser que desde una máquina externa sí funcione correctamente como es el caso de localhost, pero no es seguro.
+
+Desgracias de la configuración de un sever.
+
+![xkcd.com/1084](img/4/xkcd.png)
+
+# Certificado SSL
 
 Generaremos un certificado SSL autofirmado desde la máquina M1, copiándolo a M2 mediante ssh.
 
