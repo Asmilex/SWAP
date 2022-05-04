@@ -131,8 +131,64 @@ ssl_certificate_key /home/amilmun/ssl/apache_amilmun.key;
 
 De esta forma, se puede acceder a `https://192.168.49.130`. Muestra un error de certificado, lo cual es normal; pues no está distribuido por un agente de confianza.
 
-
 # Configuración del firewall
+
+Todo servidor que se precie debe tener un cortafuegos configurado. En esta sección, pondremos en marcha el nuestro utilizando `iptables`.
+
+
+
+## Diseño de las reglas
+
+El plan será denegar todo tipo de conexión por defecto, y entonces, habilitaremos las que a nosotros nos interesen. En este caso, serán las conexiones (puesto que estamos en un servidor) y el tráfico proveniente de SSH, HTTP y HTTPS.
+
+Para ello, crearemos un script en alguna de las máquinas o el localhost con el siguiente contenido:
+
+```bash
+#!/bin/bash
+
+# Eliminar cualquier configuración anterior
+iptables -F
+iptables -X
+
+# Denegar por defecto el tráfico
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# Habilitar conexión con el localhost (interfaz lo)
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Permitir conexiones
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+
+# Permitir SSH
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+
+# Permitir HTTP
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
+
+# Permitir HTTPS
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
+```
+
+Este script debemos traspasarlo a cada máquina con `scp`, como hicimos con los certificados. La ruta será `/home/amilmun/.iptables/iptables_script.sh`.
+
+![](img/4/scp_iptables.png)
+
+Podemos ejecutarlo con `sudo ./iptables_script.sh` en cada una.
+
+Tras ejecutarlo, podemos ver que no podemos hacer ping a M1:
+
+![](img/4/M1_ping.png)
+
+Mientras que `curl` funciona perfectamente:
+
+![](img/4/M1_curl.png)
 
 ## Ejecución automática del script al arrancar
 
