@@ -114,7 +114,23 @@ sudo scp /etc/apache2/ssl/apache_amilmun.crt amilmun@192.168.49.129:/etc/apache2
 sudo scp /etc/apache2/ssl/apache_amilmun.key amilmun@192.168.49.129:/etc/apache2/ssl/apache_amilmun.key
 
 # M1 -> M3
+# Desde M3, podemos hacer
+sudo scp -r amilmun@192.168.49.128:/etc/apache2/ssl /home/amilmun/ssl
 ```
+
+Cuando lo hagamos, en M2 debemos editar la configuración, activar el módulo y reiniciar Apache, como en M1; mientras que en M3, añadiremos los parámetros pertinentes a la configuración de Nginx:
+
+```
+listen 443 ssl;
+ssl on;
+ssl_certificate /home/amilmun/ssl/apache_amilmun.crt;
+ssl_certificate_key /home/amilmun/ssl/apache_amilmun.key;
+```
+
+![](img/4/nginx_ssl.png)
+
+De esta forma, se puede acceder a `https://192.168.49.130`. Muestra un error de certificado, lo cual es normal; pues no está distribuido por un agente de confianza.
+
 
 # Configuración del firewall
 
