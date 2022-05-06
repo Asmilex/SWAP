@@ -131,6 +131,37 @@ ssl_certificate_key /home/amilmun/ssl/apache_amilmun.key;
 
 De esta forma, se puede acceder a `https://192.168.49.130`. Muestra un error de certificado, lo cual es normal; pues no está distribuido por un agente de confianza.
 
+## Opciones avanzadas
+
+### Comprobación del certificado
+
+Podemos comprobar el estado del certificado gracias a `openssl`. El comando sería
+
+```bash
+openssl s_client -connect {ip máquina}:443 -showcerts
+```
+
+Por ejemplo, para M1 se obtiene
+
+![Openssl permite comprobar el certificado. La salida está cortada.](img/4/openssl.png)
+
+### Configuración adicional de Apache
+
+https://www.digitalocean.com/community/tutorials/how-to-create-a-self-signed-ssl-certificate-for-apache-in-ubuntu-18-04-es
+
+Aunque estas opciones no las acabaremos usando, exiten algunos parámetros interesantes que podemos editar.
+
+Uno de ellos es la redirección a HTTPS desde HTTP. Para lograrlo, podemos editar la configuración `/etc/apache2/sites-avaliable/000-default.conf` del puerto 80, escribiendo
+
+```
+<VirtualHost *:80>
+        Redirect "/" "https://{IP}/"
+</VirtualHost>
+```
+
+![Dado que no tenemos un nombre para el servidor, no podemos completar correctamente la configuración.](img/4/redirect.png)
+
+
 # Configuración del firewall
 
 Todo servidor que se precie debe tener un cortafuegos configurado. En esta sección, pondremos en marcha el nuestro utilizando `iptables`.
