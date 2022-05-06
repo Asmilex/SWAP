@@ -192,7 +192,17 @@ Mientras que `curl` funciona perfectamente:
 
 ## Ejecución automática del script al arrancar
 
-https://www.ubuntuleon.com/2016/10/cargar-un-script-al-inicio-del-sistema.html
+Ejecutar un script al inicio del sistema es sencillo. Para conseguirlo, creamos el archivo `/etc/rc.local` con el siguiente contenido:
+
+```bash
+#!/bin/sh -e
+/home/amilmun/.iptables/iptables_script.sh
+exit 0
+```
+
+Hacemos `sudo chmod +x /etc/rc.local` y listo.
+
+![Las reglas se aplican automáticamente. Vemos que no podemos hacer ping](img/4/arranque.png)
 
 # Referencias
 
