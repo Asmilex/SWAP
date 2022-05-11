@@ -44,17 +44,17 @@ Como siempre, las IPs de las máquinas son las siguientes:
 
 Antes de comenzar la práctica, voy a explicar por qué todas mis prácticas anteriores eran incorrectas, y por qué me acabo de dar cuenta.
 
-Intentando hacer scp de M1 a M2 para copiar el certificado, me he encontrado con un error extraño. El archivo no se copiaba. O, mejor dicho, se copiaba a la misma máquina aún poniendo la IP correcta. Haciendo más pruebas, nos dimos cuenta de que M1 podía hacer ping a M2, pero M2 no podía a M1. Y desde el localhost, todo funcionaba bien.
+Intentando hacer scp de M1 a M2 para copiar el certificado, me he encontrado con un error extraño. El archivo no se copiaba. O, mejor dicho, se copiaba a la misma máquina aún poniendo la IP correcta. Haciendo más pruebas, nos dimos cuenta de que M1 podía hacer ping a M2, pero M2 no podía a M1. Y desde el localhost, todo funcionaba bien. Al usar `scp` desde localhost conseguíamos conectarnos correctamente a M1, pero para M2 daba un fallo muy extraño.
 
 ¿El error? El netplan estaba mal configurado.
 
 ![Netplan de la práctica 1. Ahora es fácil adivinar el error](img/1/netplan.png){ width=450px }
 
-Aún limitando la IP a una sola, `dchp4: true` asigna una adicional. Esta no figura en `ifconfig`, pero sí en `ip a`.
+Aún limitando la IP a una única, `dchp4: true` proporciona otra IP adicional a continuación de la especificada. Es decir, si M1 tenía `192.168.49.128`, este netplan le proporcionaba `.128` y `.129`. Esto no aparecía en `ifconfig`, pero sí en `ip a`.
 
 Es por estos motivos que SSH dio problemas al pasar de la práctica 1 a la 2; `rsync` no funcionó en la práctica 2; y es posible que no estuviéramos haciendo balanceo de carga en la práctica 3. Podría ser que desde una máquina externa sí funcione correctamente como es el caso de localhost, pero no es seguro.
 
-Desgracias de la configuración de un sever.
+Desgracias de la configuración de un servidor.
 
 ![xkcd.com/1084](img/4/xkcd.png)
 
@@ -167,7 +167,7 @@ Por ejemplo, para M1 se obtiene
 
 ### Configuración adicional de Apache
 
-Aunque estas opciones no las acabaremos usando, exiten algunos parámetros interesantes que podemos editar.
+Aunque estas opciones no las acabaremos usando, existen algunos parámetros interesantes que podemos editar.
 
 Uno de ellos es la redirección a HTTPS desde HTTP. Para lograrlo, podemos editar la configuración `/etc/apache2/sites-avaliable/000-default.conf` del puerto 80, escribiendo [@digitalocean]
 
@@ -181,7 +181,7 @@ Uno de ellos es la redirección a HTTPS desde HTTP. Para lograrlo, podemos edita
 
 ### Configuración adicional de Nginx
 
-Las operaciones de SSL consumen recursos adicionales. Una de las más costosas es el handshake. Para minimizarlas, podemos habilitar que las conexiones *keepalive* puedan mandar varias peticiones a la misma conexión. Otra opción es reutilizar los parámetros de la sessión SSL para evitar los handshakes en operaciones paralelas y subsecuentes [@nginx].
+Las operaciones de SSL consumen recursos adicionales. Una de las más costosas es el handshake. Para minimizarlas, podemos habilitar que las conexiones *keepalive* puedan mandar varias peticiones a la misma conexión. Otra opción es reutilizar los parámetros de la sesión SSL para evitar los handshakes en operaciones paralelas y subsecuentes [@nginx].
 
 Estos parámetros se pueden editar en el archivo `/etc/nginx/conf.d/default.conf`:
 
@@ -245,6 +245,8 @@ Mientras que `curl` funciona perfectamente:
 
 ![Sin embargo, el tráfico HTTPS funciona](img/4/M1_curl.png){ width=450px }
 
+![Curl también funciona para M3](./img/4/curl_M3.png){ width=450px }
+
 ## Ejecución automática del script al arrancar
 
 Ejecutar un script al inicio del sistema es sencillo. Para conseguirlo, creamos el archivo `/etc/rc.local` con el siguiente contenido:
@@ -262,9 +264,9 @@ Hacemos `sudo chmod +x /etc/rc.local` y listo.
 
 ### Opciones avanzadas de iptables
 
-Entre las opciones propuestas, vamos a documentar un par: que M1 y M2 solo acepten peticiones desde M3 y habilitar `ping`.
+Entre las opciones propuestas, vamos a documentar un par: que M1 y M2 solo acepten peticiones desde M3 y habilitar ICMP para los `ping`.
 
-Para permitir el tráfico HTTP(S) de M1 y M2 exclusivamente desde M3, debemos modificar las reglas
+Si queremos permitir el tráfico HTTP(S) de M1 y M2 exclusivamente desde M3, debemos modificar las reglas
 
 ```
 iptables -A INPUT  -p tcp --dport 80  -j ACCEPT
@@ -282,7 +284,7 @@ iptables -A INPUT  -p tcp --dport 443 -s 192.168.49.130 -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 443 -d 192.168.49.130 -j ACCEPT
 ```
 
-Para permitir los pings, debemos usar la siguientes reglas [@iptables]:
+Para permitir los pings, debemos usar las siguientes reglas [@iptables]:
 
 ```
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
