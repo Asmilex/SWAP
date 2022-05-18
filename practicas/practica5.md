@@ -53,7 +53,7 @@ create table datos(nombre varchar(70), apellidos varchar(200), usuario varchar(1
 insert into datos(nombre, apellidos, usuario, email) values ("Andres", "Millan Munoz", "amilmun", "amilmun@correo.ugr.es");
 ```
 
-![](img/5/M1_mysql.png)
+![Creación de las tablas básicas en M1](img/5/M1_mysql.png)
 
 Tras esto, bloqueamos la base de datos para que no se pueda modificar con `FLUSH TABLES WITH READ LOCK;`, salimos, y hacemos una copia con mysql-dump:
 
@@ -61,7 +61,7 @@ Tras esto, bloqueamos la base de datos para que no se pueda modificar con `FLUSH
 sudo mysqldump estudiante -u root -p > /home/amilmun/copia.sql
 ```
 
-![](img/5/M1_mysql_copia.png)
+![Podemos observar cómo mysqldump genera un archivo con la información de la base de datos](img/5/M1_mysql_copia.png)
 
 Por último, desbloqueamos la tabla con `UNCLOCK TABLES;` y copiamos el archivo `copia.sql` a M2 con algún método. Por ejemplo, mediante `scp`.
 
@@ -71,7 +71,7 @@ Ahora debemos restaurar la **base de datos en M2**. Para ello, entramos en el cl
 sudo mysql -u root -p estudiante < /home/amilmun/copia.sql
 ```
 
-![](img/5/M2_copia.png)
+![Restauración de la base de datos en M2](img/5/M2_copia.png)
 
 ## Configuración del maestro-esclavo
 
@@ -106,7 +106,9 @@ Toca cambiar la configuración de MySQL. Los pasos son los siguientes:
 9. **M1**: Reactivamos las tablas con `UNLOCK TABLES;`.
 10. **M2**: Comprobamos el estado del slave con `SHOW SLAVE STATUS\G;`.
 
-![Pasos 5 y 6](img/5/Paso%206.png)
+Si nos preguntamos para qué sirven `bind-address` y `server-id`, el primero escucha la URL especificada para conexiones TCP e IP, y el segundo determina el identificador de una máquina; el cual debe ser especificado si se activa el *binary logging*, como ocurre en este caso [@bind-address] [@server-id].
+
+![Pasos 5 y 6. ](img/5/Paso%206.png)
 
 ![Pasos 7 y 8](img/5/Paso%208.png)
 
