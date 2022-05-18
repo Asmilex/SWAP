@@ -111,3 +111,15 @@ Toca cambiar la configuración de MySQL. Los pasos son los siguientes:
 ![Pasos 7 y 8](img/5/Paso%208.png)
 
 ![Paso 10](img/5/Paso%2010.png)
+
+Si todo sale bien, debería aparecernos en `Seconds_Behind_Master` un número, y no el valor `NULL`. Como podemos observar en la foto del paso 10, hemos conseguido nuestro objetivo.
+
+# Modificando iptables
+
+Si nos fijamos en la configuración, hemos utilizado el puerto 3306 para el tráfico de MySQL. Para que nuestro cortafuegos no genere problemas, debemos añadir una excepción al script de la práctica anterior. Ponemos al final:
+
+```
+# Permitir MySQL
+iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 3306 -j ACCEPT
+```
