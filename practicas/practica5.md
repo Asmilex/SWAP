@@ -123,3 +123,18 @@ Si nos fijamos en la configuración, hemos utilizado el puerto 3306 para el trá
 iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 3306 -j ACCEPT
 ```
+
+# Opciones avanzadas
+
+Como opción avanzada al apartado de *Base datos MySQL comandos*, podemos describir el uso de algunas reglas en la creación de la tabla de datos. Por ejemplo, podríamos haber especificado que ninguno de los campos sea nulo con `NOT NULL` [@mysql-tabla]. De esta forma, si algún campo está vacío, no podrá ser insertado en la base de datos:
+
+```
+create table datos(
+    nombre varchar(70) not null,
+    apellidos varchar(200) not null,
+    usuario varchar(100) not null,
+    email varchar(200) not null,
+);
+```
+
+Con respecto a mysqldump, existen un par de parámetros bastante útiles. El primero es `-databases`, que permite especificar varias bases de datos. Si queremos respaldar todas, podemos usar `--all-databases`. Si trabajamos en remoto, podríamos especificar también el host con `-h {{IP}}` [@mysqldump].
