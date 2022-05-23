@@ -44,12 +44,17 @@ Recordemos que las IPs de las máquinas virtuales son:
 
 ## Poniendo las bases de datos a punto
 
-Primero, vamos a crear una BD de **MySQL en M1**. Para ello, nos conectamos al cliente con `sudo mysql -u root -p`. La contraseña es la misma de siempre. Una vez estemos dentro del programa, creamos una tabla de estudiantes y añadimos mi información personal dentro:
+Primero, vamos a crear una BD de **MySQL en M1**. Para ello, desde M1 iniciamos el cliente con `sudo mysql -u root -p`. La contraseña es la misma de siempre. Una vez estemos dentro del programa, creamos una tabla de estudiantes y añadimos mi información personal dentro:
 
 ```
 create database estudiante;
 use estudiante;
-create table datos(nombre varchar(70), apellidos varchar(200), usuario varchar(100), email varchar(200));
+create table datos(
+    nombre      varchar(70),
+    apellidos   varchar(200),
+    usuario     varchar(100),
+    email       varchar(200)
+);
 insert into datos(nombre, apellidos, usuario, email) values ("Andres", "Millan Munoz", "amilmun", "amilmun@correo.ugr.es");
 ```
 
@@ -63,7 +68,7 @@ sudo mysqldump estudiante -u root -p > /home/amilmun/copia.sql
 
 ![Podemos observar cómo mysqldump genera un archivo con la información de la base de datos](img/5/M1_mysql_copia.png)
 
-Por último, desbloqueamos la tabla con `UNCLOCK TABLES;` y copiamos el archivo `copia.sql` a M2 con algún método. Por ejemplo, mediante `scp`.
+Por último, desbloqueamos la tabla con `UNCLOCK TABLES;` y copiamos el archivo `copia.sql` a M2 con alguno de los métodos que conocemos, como puede ser `scp`.
 
 Ahora debemos restaurar la **base de datos en M2**. Para ello, entramos en el cliente y creamos la base de datos `estudiante`. Tras esto, hacemos
 
@@ -108,13 +113,27 @@ Toca cambiar la configuración de MySQL. Los pasos son los siguientes:
 
 Si nos preguntamos para qué sirven `bind-address` y `server-id`, el primero escucha la URL especificada para conexiones TCP e IP, y el segundo determina el identificador de una máquina; el cual debe ser especificado si se activa el *binary logging*, como ocurre en este caso [@bind-address] [@server-id].
 
-![Pasos 5 y 6. ](img/5/Paso%206.png)
+![Pasos 5 y 6.](img/5/Paso%206.png)
 
 ![Pasos 7 y 8](img/5/Paso%208.png)
 
-![Paso 10](img/5/Paso%2010.png)
+![Paso 10](img/5/Paso%2010.png){width=70%}
 
 Si todo sale bien, debería aparecernos en `Seconds_Behind_Master` un número, y no el valor `NULL`. Como podemos observar en la foto del paso 10, hemos conseguido nuestro objetivo.
+
+## Configuración del maestro-maestro
+
+Para crear una configuración del tipo maestro-maestro, lo que debemos hacer en esencias es cambiar los papeles de M1 y M2 del [apartado anterior](#configuración-del-maestro-esclavo) a partir del paso 5.
+
+![Configuración de M2 como maestro](./img/5/M2_maestro.png)
+
+![Configuración de M1 como esclavo](./img/5/M1_esclavo.png)
+
+![Estado de M1 como esclavo](./img/5/M1_status.png)
+
+De esta forma, la configuración de esta técnica está terminada. Podemos ver que todo funciona correctamente:
+
+![Sincronización de los clientes](./img/5/Prueba_de_uso.png)
 
 # Modificando iptables
 
@@ -128,15 +147,18 @@ iptables -A OUTPUT -p tcp --sport 3306 -j ACCEPT
 
 # Opciones avanzadas
 
-Como opción avanzada al apartado de *Base datos MySQL comandos*, podemos describir el uso de algunas reglas en la creación de la tabla de datos. Por ejemplo, podríamos haber especificado que ninguno de los campos sea nulo con `NOT NULL` [@mysql-tabla]. De esta forma, si algún campo está vacío, no podrá ser insertado en la base de datos:
+Como opción avanzada en el apartado de *Base datos MySQL comandos*, podemos describir el uso de algunas reglas en la creación de la tabla de datos. Por ejemplo, podríamos haber especificado que ninguno de los campos sea nulo con `NOT NULL` [@mysql-tabla]. De esta forma, si algún campo está vacío, no podrá ser insertado en la base de datos:
 
 ```
 create table datos(
-    nombre varchar(70) not null,
-    apellidos varchar(200) not null,
-    usuario varchar(100) not null,
-    email varchar(200) not null,
+    nombre      varchar(70)  not null,
+    apellidos   varchar(200),
+    usuario     varchar(100) not null,
+    email       varchar(200) not null,
 );
 ```
 
 Con respecto a mysqldump, existen un par de parámetros bastante útiles. El primero es `-databases`, que permite especificar varias bases de datos. Si queremos respaldar todas, podemos usar `--all-databases`. Si trabajamos en remoto, podríamos especificar también el host con `-h {{IP}}` [@mysqldump].
+
+
+# Bibliografía
