@@ -145,6 +145,8 @@ iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
 iptables -A OUTPUT -p tcp --sport 3306 -j ACCEPT
 ```
 
+Si queremos permitir únicamente las IPs respectivas a las máquinas M1 y M2, podemos hacer lo mismo que en la anterior práctica. Al output, podemos añadir `-d 192.168.49.12{8 o 9}`, y al input, `-s 192.168.49.12{8 o 9}`, para que así solo se acepte el tráfico de M1 o M2 según corresponda.
+
 # Opciones avanzadas
 
 Como opción avanzada en el apartado de *Base datos MySQL comandos*, podemos describir el uso de algunas reglas en la creación de la tabla de datos. Por ejemplo, podríamos haber especificado que ninguno de los campos sea nulo con `NOT NULL` [@mysql-tabla]. De esta forma, si algún campo está vacío, no podrá ser insertado en la base de datos:
