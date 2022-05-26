@@ -32,7 +32,7 @@ bibliography: bibliografia.bib
 
 <!-- LTeX: language=es -->
 
-Para esta última práctica vamos a configurar un servidor NFS con el fin de proporcionar espacio adicional a las máquinas del backend; las cuales actuarán como un cliente de NFS.
+Para esta última práctica vamos a configurar un servidor NFS con el fin de proporcionar espacio adicional a las máquinas del backend; las cuales actuarán como clientes de NFS.
 
 Las IPs de las máquinas son:
 
@@ -43,9 +43,9 @@ Las IPs de las máquinas son:
 
 # Creación de la máquina NFS
 
-Nuestro primer objetivo será crear una nueva máquina virtual que haga las veces de NFS. Para ello, utilizamos la misma ISO de Ubuntu server de las anteriores máquinas.
+Nuestro primer objetivo será crear una nueva máquina virtual que haga las veces de NFS. Para ello, utilizamos la misma ISO de Ubuntu Server de las anteriores máquinas.
 
-El proceso de instalación es análogo, así que no lo detallaremos. Lo único que merece la pena destacar es que el usuario será `amilmun` y su contraseña `Swap1234`, al igual que en los casos anteriores. Además, editaremos el netplan para fijar en la segunda tarjeta la IP a `192.168.49.131/24` y dchp a `false`.
+El proceso de instalación es análogo, así que no lo detallaremos. Lo único que merece la pena destacar es que el usuario será `amilmun` y su contraseña `Swap1234`, al igual que en los casos anteriores. Además, editaremos el netplan para fijar en la segunda tarjeta la IP a `192.168.49.131/24` y dhcp a `false`.
 
 ![Netplan de NFS](./img/6/netplan.png)
 
@@ -97,12 +97,13 @@ Si ponemos un archivo en la carpeta, veremos que se sincroniza en todas las máq
 En este momento existe un problema con la configuración: cada vez que reiniciemos las máquinas hará falta montar de nuevo la carpeta de `datos`. Podemos solucionarlo añadiendo la siguiente línea en el fichero `/etc/fstab`:
 
 ```sh
+# M1 y M2
 192.168.49.131:/datos/compartido /home/amilmun/datos/ nfs auto,noatime,nolock,bg,nfsvers=3,intr,tcp,actimeo=1800 0 0
 ```
 
 # Seguridad del servidor NFS
 
-Para reforzar la seguridad del servidor, bloquearemos mediante iptables todo el tráfico a excepción del que esté relacionado con NFS. No obstante, añadiré SSH puesto que lo estoy utilizando.
+Para reforzar la seguridad del servidor, bloquearemos mediante iptables todo el tráfico a excepción del que esté relacionado con NFS.
 
 Antes de crear el script, debemos cambiar la configuración de mountd y nlockmgr. Por defecto, utilizan puertos dinámicos. Para la configuración que sabemos hacer nosotros con iptables esto no nos beneficia. Aunque no es el método óptimo, podemos cambiarlo a puertos estáticos:
 
@@ -119,7 +120,7 @@ En mi caso fue necesario reiniciar la máquina para la configuración de nlockmg
 
 ![Configuración de los puertos.](img/6/puertos.png)
 
-Ahora estamos en condiciones de diseñar las reglas. Creamos un script similar a los de las anteriores prácticas, especificando las IPs de las máquinas M1 y M2 [@iptables-2]:
+Ahora estamos en condiciones de diseñar las reglas. Creamos un script similar a los de las anteriores prácticas, especificando las IPs de las máquinas M1 y M2 [@iptables-2]. En mi caso, añadiré SSH puesto que lo estoy utilizando para realizar esta práctica más fácilmente:
 
 ```sh
 #!/bin/bash
@@ -132,10 +133,6 @@ iptables -X
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT DROP
-
-# Habilitar conexión con localhost
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
 
 # Permitir SSH
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
